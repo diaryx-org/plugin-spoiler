@@ -2,7 +2,7 @@
 title: "Spoiler"
 description: "Discord-style ||spoiler|| syntax to hide text until clicked"
 id: "diaryx.spoiler"
-version: "0.1.2"
+version: "0.1.3"
 author: "Diaryx Team"
 license: "PolyForm Shield 1.0.0"
 repository: "https://github.com/diaryx-org/plugin-spoiler"
