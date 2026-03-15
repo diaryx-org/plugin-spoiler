@@ -3,42 +3,8 @@
 //! Provides Discord-style `||hidden text||` spoiler syntax as an inline mark.
 //! Text wrapped in double pipes is hidden until clicked.
 
+use diaryx_plugin_sdk::prelude::*;
 use extism_pdk::*;
-use serde_json::Value as JsonValue;
-
-// ============================================================================
-// Protocol types (mirrors diaryx_extism::protocol)
-// ============================================================================
-
-#[derive(serde::Serialize, serde::Deserialize)]
-struct GuestManifest {
-    id: String,
-    name: String,
-    version: String,
-    description: String,
-    capabilities: Vec<String>,
-    #[serde(default)]
-    ui: Vec<JsonValue>,
-    #[serde(default)]
-    commands: Vec<String>,
-    #[serde(default)]
-    cli: Vec<JsonValue>,
-}
-
-#[derive(serde::Serialize, serde::Deserialize)]
-struct CommandRequest {
-    command: String,
-    params: JsonValue,
-}
-
-#[derive(serde::Serialize, serde::Deserialize)]
-pub struct CommandResponse {
-    pub success: bool,
-    #[serde(default)]
-    pub data: Option<JsonValue>,
-    #[serde(default)]
-    pub error: Option<String>,
-}
 
 // ============================================================================
 // Spoiler CSS
@@ -77,6 +43,7 @@ const SPOILER_CSS: &str = r#"
 #[plugin_fn]
 pub fn manifest(_input: String) -> FnResult<String> {
     let manifest = GuestManifest {
+        protocol_version: CURRENT_PROTOCOL_VERSION,
         id: "diaryx.spoiler".into(),
         name: "Spoiler".into(),
         version: env!("CARGO_PKG_VERSION").into(),
@@ -109,6 +76,7 @@ pub fn manifest(_input: String) -> FnResult<String> {
         })],
         commands: vec![],
         cli: vec![],
+        requested_permissions: None,
     };
 
     Ok(serde_json::to_string(&manifest)?)
@@ -119,11 +87,7 @@ pub fn manifest(_input: String) -> FnResult<String> {
 pub fn handle_command(input: String) -> FnResult<String> {
     let request: CommandRequest = serde_json::from_str(&input).map_err(extism_pdk::Error::msg)?;
 
-    let response = CommandResponse {
-        success: false,
-        data: None,
-        error: Some(format!("Unknown command: {}", request.command)),
-    };
+    let response = CommandResponse::err(format!("Unknown command: {}", request.command));
 
     Ok(serde_json::to_string(&response)?)
 }
