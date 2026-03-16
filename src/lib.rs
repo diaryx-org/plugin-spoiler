@@ -42,42 +42,38 @@ const SPOILER_CSS: &str = r#"
 /// Return the plugin manifest.
 #[plugin_fn]
 pub fn manifest(_input: String) -> FnResult<String> {
-    let manifest = GuestManifest {
-        protocol_version: CURRENT_PROTOCOL_VERSION,
-        id: "diaryx.spoiler".into(),
-        name: "Spoiler".into(),
-        version: env!("CARGO_PKG_VERSION").into(),
-        description: "Discord-style ||spoiler|| syntax to hide text until clicked".into(),
-        capabilities: vec!["editor_extension".into()],
-        ui: vec![serde_json::json!({
-            "slot": "EditorExtension",
-            "extension_id": "spoiler",
-            "node_type": "InlineMark",
-            "markdown": {
-                "level": "Inline",
-                "open": "||",
-                "close": "||",
+    let manifest = GuestManifest::new(
+        "diaryx.spoiler",
+        "Spoiler",
+        env!("CARGO_PKG_VERSION"),
+        "Discord-style ||spoiler|| syntax to hide text until clicked",
+        vec!["editor_extension".into()],
+    )
+    .ui(vec![serde_json::json!({
+        "slot": "EditorExtension",
+        "extension_id": "spoiler",
+        "node_type": "InlineMark",
+        "markdown": {
+            "level": "Inline",
+            "open": "||",
+            "close": "||",
+        },
+        "render_export": null,
+        "edit_mode": null,
+        "css": SPOILER_CSS,
+        "keyboard_shortcut": "Mod-Shift-s",
+        "click_behavior": {
+            "ToggleClass": {
+                "hidden_class": "spoiler-hidden",
+                "revealed_class": "spoiler-revealed",
             },
-            "render_export": null,
-            "edit_mode": null,
-            "css": SPOILER_CSS,
-            "keyboard_shortcut": "Mod-Shift-s",
-            "click_behavior": {
-                "ToggleClass": {
-                    "hidden_class": "spoiler-hidden",
-                    "revealed_class": "spoiler-revealed",
-                },
-            },
-            "insert_command": {
-                "label": "Spoiler",
-                "icon": "eye-off",
-                "description": "Hide text behind a spoiler",
-            },
-        })],
-        commands: vec![],
-        cli: vec![],
-        requested_permissions: None,
-    };
+        },
+        "insert_command": {
+            "label": "Spoiler",
+            "icon": "eye-off",
+            "description": "Hide text behind a spoiler",
+        },
+    })]);
 
     Ok(serde_json::to_string(&manifest)?)
 }
